@@ -27,10 +27,12 @@
 #include <stdio.h> /* file ops */
 #include <stdlib.h> /* alloc */
 #include <sys/stat.h> /* stat */
+#include <fcntl.h> /* open */
 #include <string.h> /* strdup */
 #include <unistd.h> /* chdir, getcwd */
 #include <stdarg.h>
 #include <locale.h>
+#include <errno.h>
 
 #ifdef _WIN32
  #include <windows.h>
@@ -117,6 +119,12 @@ wow_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
 WOW_API_PREFIX
 FILE *
 wow_fopen(char const *name, char const *mode);
+
+
+/* open abstraction for utf8 support on windows win32 */
+WOW_API_PREFIX
+int
+wow_open(const char *path, int flags, int mode);
 
 
 /* remove abstraction for utf8 support on windows win32 */
@@ -599,6 +607,24 @@ L_cleanup:
 }
 
 
+/* open abstraction for utf8 support on windows win32 */
+WOW_API_PREFIX
+int
+wow_open(const char *path, int flags, int mode)
+{
+	int fd;
+	
+#if defined(_WIN32) && defined(_UNICODE)
+	void *p = wow_utf8_to_wchar_die(path);
+	fd = _wopen(p, flags, mode);
+	free(p);
+#else
+	fd = open(path, flags, mode);
+#endif
+	return fd;
+}
+
+
 /* remove abstraction for utf8 support on windows win32 */
 WOW_API_PREFIX
 int
@@ -871,6 +897,7 @@ wow_system_gui(char const *name, const char *param)
  #define  fopen       wow_fopen
  #define  fread       wow_fread
  #define  fwrite      wow_fwrite
+ #define  remove      wow_remove
 #endif
 
 #ifdef WOW_OVERLOAD_ALLOCATORS
