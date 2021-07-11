@@ -168,6 +168,19 @@ WOW_API_PREFIX
 int
 wow_system(char const *path);
 
+
+/* system_gui */
+WOW_API_PREFIX
+int
+wow_system_gui(char const *name, const char *param);
+
+
+/* window icon */
+WOW_API_PREFIX
+void
+wow_windowicon(int iconId);
+
+
 WOW_API_PREFIX void wow_die(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2)))
 ;
@@ -888,6 +901,48 @@ wow_system_gui(char const *name, const char *param)
 	int rval = system(x);
 	free(x);
 	return rval;
+#endif
+}
+
+
+/* window icon */
+WOW_API_PREFIX
+void
+wow_windowicon(int iconId)
+{
+#ifdef _WIN32
+	HWND win = GetActiveWindow();
+	if( win )
+	{
+		SendMessage(
+			win
+			, WM_SETICON
+			, ICON_BIG
+			, (LPARAM)LoadImage(
+					GetModuleHandle(NULL)
+					, MAKEINTRESOURCE(iconId)
+					, IMAGE_ICON
+					, 32//GetSystemMetrics(SM_CXSMICON)
+					, 32//GetSystemMetrics(SM_CXSMICON)
+					, 0
+				)
+		);
+		SendMessage(
+			win
+			, WM_SETICON
+			, ICON_SMALL
+			, (LPARAM)LoadImage(
+					GetModuleHandle(NULL)
+					, MAKEINTRESOURCE(iconId)
+					, IMAGE_ICON
+					, 16//GetSystemMetrics(SM_CXSMICON)
+					, 16//GetSystemMetrics(SM_CXSMICON)
+					, 0
+				)
+		);
+	}
+#elif defined(__linux__)
+	/* TODO */
 #endif
 }
 
