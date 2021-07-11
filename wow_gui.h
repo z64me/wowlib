@@ -410,6 +410,14 @@ WOW_GUI_API_PREFIX int wowGui_popupf(
 	, const char *fmt
 	, ...
 ) __attribute__ ((format (printf, 5, 6)));
+WOW_GUI_API_PREFIX void wowGui_infof(const char *fmt, ...)
+	__attribute__ ((format (printf, 1, 2)));
+WOW_GUI_API_PREFIX void wowGui_warnf(const char *fmt, ...)
+	__attribute__ ((format (printf, 1, 2)));
+WOW_GUI_API_PREFIX void wowGui_errorf(const char *fmt, ...)
+	__attribute__ ((format (printf, 1, 2)));
+WOW_GUI_API_PREFIX void wowGui_dief(const char *fmt, ...)
+	__attribute__ ((format (printf, 1, 2)));
 WOW_GUI_API_PREFIX int wowGui_fileDropper_filenameIsEmpty(
 	const struct wowGui_fileDropper *v
 );
@@ -4479,6 +4487,88 @@ wowGui_popupf(
 	vsnprintf(message, sizeof(message), fmt, args);
 	va_end(args);
 	return wowGui_popup(icon, buttons, initial, title, message);
+}
+
+
+
+WOW_GUI_API_PREFIX
+void
+wowGui_infof(const char *fmt, ...)
+{
+	va_list ap;
+	va_start (ap, fmt);
+	char message[4096];
+	vsnprintf(message, sizeof(message), fmt, ap);
+	wowGui_popup(
+		WOWGUI_POPUP_ICON_INFO
+		, WOWGUI_POPUP_OK
+		, WOWGUI_POPUP_OK
+		, "Information"
+		, message
+	);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+}
+
+
+WOW_GUI_API_PREFIX
+void
+wowGui_warnf(const char *fmt, ...)
+{
+	va_list ap;
+	va_start (ap, fmt);
+	char message[4096];
+	vsnprintf(message, sizeof(message), fmt, ap);
+	wowGui_popup(
+		WOWGUI_POPUP_ICON_WARN
+		, WOWGUI_POPUP_OK
+		, WOWGUI_POPUP_OK
+		, "Warning"
+		, message
+	);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+}
+
+
+WOW_GUI_API_PREFIX
+void
+wowGui_errorf(const char *fmt, ...)
+{
+	va_list ap;
+	va_start (ap, fmt);
+	char message[4096];
+	vsnprintf(message, sizeof(message), fmt, ap);
+	wowGui_popup(
+		WOWGUI_POPUP_ICON_ERR
+		, WOWGUI_POPUP_OK
+		, WOWGUI_POPUP_OK
+		, "Error"
+		, message
+	);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+}
+
+
+WOW_GUI_API_PREFIX
+void
+wowGui_dief(const char *fmt, ...)
+{
+	va_list ap;
+	va_start (ap, fmt);
+	char message[4096];
+	vsnprintf(message, sizeof(message), fmt, ap);
+	wowGui_popup(
+		WOWGUI_POPUP_ICON_ERR
+		, WOWGUI_POPUP_OK
+		, WOWGUI_POPUP_OK
+		, "Error"
+		, message
+	);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+	exit(EXIT_FAILURE);
 }
 /*
  *
