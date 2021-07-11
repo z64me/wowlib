@@ -1,3 +1,6 @@
 [submodule "minifb"]
 	path = minifb
 	url = https://github.com/z64me/minifb
+[submodule "nativefiledialog"]
+	path = nativefiledialog
+	url = https://github.com/z64me/nativefiledialog
