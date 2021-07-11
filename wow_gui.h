@@ -301,9 +301,9 @@ WOW_GUI_API_PREFIX void wowGui_file_drag(int x, int y);
 WOW_GUI_API_PREFIX void wowGui_file_drop(char *file_list, int x, int y);
 WOW_GUI_API_PREFIX int wowGui_dropped_file_last(void);
 WOW_GUI_API_PREFIX char *wowGui_has_extension(char *str);
-WOW_GUI_API_PREFIX int wowGui_is_extension(char *str, char *ext);
-WOW_GUI_API_PREFIX int wowGui_force_extension(char **str, char *ext);
-WOW_GUI_API_PREFIX int wowGui_change_extension(char **str, char *ext);
+WOW_GUI_API_PREFIX int wowGui_is_extension(char *str, const char *ext);
+WOW_GUI_API_PREFIX int wowGui_force_extension(char **str, const char *ext);
+WOW_GUI_API_PREFIX int wowGui_change_extension(char **str, const char *ext);
 WOW_GUI_API_PREFIX char *wowGui_dropped_file_name(void);
 WOW_GUI_API_PREFIX void wowGui_dropped_file_flush(void);
 WOW_GUI_API_PREFIX void wowGui_mouse_click(
@@ -421,7 +421,7 @@ WOW_GUI_API_PREFIX void wowGui_dief(const char *fmt, ...)
 WOW_GUI_API_PREFIX int wowGui_fileDropper_filenameIsEmpty(
 	const struct wowGui_fileDropper *v
 );
-WOW_GUI_API_PREFIX char * wowGui_askFilename(
+WOW_GUI_API_PREFIX char *wowGui_askFilename(
 	const char *ext
 	, const char *path
 	, const char isCreateMode
@@ -1823,7 +1823,7 @@ wowGui_has_extension(char *str)
 
 WOW_GUI_API_PREFIX
 int
-wowGui_is_extension(char *str, char *ext)
+wowGui_is_extension(char *str, const char *ext)
 {
 	if (!str)
 		return 0;
@@ -1834,7 +1834,7 @@ wowGui_is_extension(char *str, char *ext)
 /* forces string to end in extension (returns non-zero on memory failure) */
 WOW_GUI_API_PREFIX
 int
-wowGui_force_extension(char **str, char *ext)
+wowGui_force_extension(char **str, const char *ext)
 {
 	int len;
 	
@@ -1856,7 +1856,7 @@ wowGui_force_extension(char **str, char *ext)
 /* forces string to end in extension (returns non-zero on memory failure) */
 WOW_GUI_API_PREFIX
 int
-wowGui_change_extension(char **str, char *ext)
+wowGui_change_extension(char **str, const char *ext)
 {
 	char *has;
 	int len;
@@ -4611,7 +4611,15 @@ wowGui_askFilename(
 	nfdresult_t result;
 	
 	if (isCreateMode)
+	{
 		result = NFD_SaveDialog(ext, path, &ofn);
+		if (result == NFD_OKAY
+			&& ofn
+			&& ext
+			&& strlen(ext) == strcspn(ext, ",;")
+		)
+			wowGui_force_extension(&ofn, ext);
+	}
 	else
 		result = NFD_OpenDialog(ext, path, &ofn);
 	
