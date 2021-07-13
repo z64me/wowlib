@@ -188,6 +188,9 @@ WOW_API_PREFIX int wow_fnChangeExtension(char **str, const char *ext);
 WOW_API_PREFIX void wow_die(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2)))
 ;
+WOW_API_PREFIX void wow_stderr(const char *fmt, ...)
+	__attribute__ ((format (printf, 1, 2)))
+;
 /* these die on allocation failure */
 WOW_API_PREFIX void *wow_calloc_die(size_t nmemb, size_t size);
 WOW_API_PREFIX void *wow_malloc_die(size_t size);
@@ -200,6 +203,25 @@ WOW_API_PREFIX void wow_free(void *ptr);
 #ifdef WOW_IMPLEMENTATION
 
 WOW_API_PREFIX void wow_die(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+#if defined(_WIN32) && defined(_UNICODE)
+	char buf[4096];
+	vsprintf(buf, fmt, args);
+	wchar_t *wc = wow_utf8_to_wchar_die(buf);
+	setlocale(LC_ALL, "");
+	fwprintf(stderr, L"%ls", wc);
+	free(wc);
+#else
+	vfprintf(stderr, fmt, args);
+#endif
+	va_end(args);
+	fprintf(stderr, "\n");
+	exit(EXIT_FAILURE);
+}
+
+WOW_API_PREFIX void wow_stderr(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
