@@ -180,6 +180,10 @@ WOW_API_PREFIX
 void
 wow_windowicon(int iconId);
 
+WOW_API_PREFIX int wow_strcasecmp(char *str, const char *ext);
+WOW_API_PREFIX char *wow_fnHasExtension(char *str);
+WOW_API_PREFIX int wow_fnChangeExtension(char **str, const char *ext);
+
 
 WOW_API_PREFIX void wow_die(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2)))
@@ -944,6 +948,86 @@ wow_windowicon(int iconId)
 #elif defined(__linux__)
 	/* TODO */
 #endif
+}
+
+/* add extension to filename */
+static int __wow_fnAddExtension(char **str, const char *ext)
+{
+	int len;
+	
+	len = strlen(*str);
+	*str = realloc(*str, len + strlen(ext) + 16);
+	/* memory error */
+	if (!*str)
+		return 1;
+	strcat(*str, ".");
+	strcat(*str, ext);
+	
+	return 0;
+}
+
+WOW_API_PREFIX
+int
+wow_strcasecmp(char *str, const char *ext)
+{
+	if (!str)
+		return 0;
+	
+	return strcasecmp(str, ext);
+}
+
+WOW_API_PREFIX
+char *
+wow_fnHasExtension(char *str)
+{
+	char *slash = strrchr(str, '\\');
+	
+	if (!slash)
+		slash = strrchr(str, '/');
+	if (!slash)
+		slash = str;
+	else
+		slash += 1;
+	
+	char *pd = strrchr(str, '.');
+	
+	/* no period, or period occurs before actual name */
+	if (!pd || pd < slash)
+		return 0;
+	
+	return pd + 1;
+}
+
+/* forces string to end in extension (returns non-zero on memory failure) */
+WOW_API_PREFIX
+int
+wow_fnChangeExtension(char **str, const char *ext)
+{
+	char *has;
+	int len;
+	
+	/* has no extension, so append one */
+	has = wow_fnHasExtension(*str);
+	if (!has)
+		return __wow_fnAddExtension(str, ext);
+	
+	/* existing extension is big enough */
+	if (strlen(has) >= strlen(ext))
+	{
+		strcpy(has, ext);
+		return 0;
+	}
+	
+	len = strlen(*str);
+	*str = realloc(*str, len + strlen(ext) + 16);
+	/* memory error */
+	if (!*str)
+		return 1;
+	*has = 0;
+	strcat(*str, ".");
+	strcat(*str, ext);
+	
+	return 0;
 }
 
 #endif /* WOW_IMPLEMENTATION */
