@@ -237,7 +237,6 @@ WOW_API_PREFIX void wow_stderr(const char *fmt, ...)
 #endif
 	va_end(args);
 	fprintf(stderr, "\n");
-	exit(EXIT_FAILURE);
 }
 
 WOW_API_PREFIX void wow_free(void *ptr)
