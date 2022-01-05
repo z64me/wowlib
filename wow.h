@@ -761,7 +761,10 @@ wow_chdir_file(char const *path)
 	slash1 = strrchr(p, '\\');
 	slash = (slash1 > slash) ? slash1 : slash;
 	if (!slash) /* already in the same directory */
+	{
+		free(p);
 		return 0;
+	}
 	*slash = '\0';
 	
 	rval = wow_chdir(p);
